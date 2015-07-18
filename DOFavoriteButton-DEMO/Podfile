@@ -1,3 +1,7 @@
-platform :ios, '8.0'
+platform :osx, '10.10'
 use_frameworks!
-pod 'DOFavoriteButton', :path => '../DOFavoriteButton.podspec'
+
+target 'DOFavoriteButton-OSX' do
+	pod 'DOFavoriteButton', :path => '../DOFavoriteButton.podspec'
+end
+

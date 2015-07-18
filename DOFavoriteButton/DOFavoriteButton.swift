@@ -9,12 +9,12 @@
 //  http://opensource.org/licenses/mit-license.php
 //
 
-import UIKit
+import AppKit
 
 @IBDesignable
-public class DOFavoriteButton: UIButton {
+public class DOFavoriteButton: NSButton {
     
-    @IBInspectable public var image: UIImage! = UIImage(named: "star", inBundle: NSBundle(forClass: DOFavoriteButton.self), compatibleWithTraitCollection: nil) {
+    @IBInspectable override public var image: NSImage! {
         didSet {
             let frame = self.frame
             let imageFrame = CGRectMake(frame.size.width / 2 - frame.size.width / 4, frame.size.height / 2 - frame.size.height / 4, frame.size.width / 2, frame.size.height / 2)
@@ -23,14 +23,14 @@ public class DOFavoriteButton: UIButton {
     }
     
     private var imageShape: CAShapeLayer!
-    @IBInspectable public var imageColorOn: UIColor! = UIColor(red: 255/255, green: 172/255, blue: 51/255, alpha: 1.0) {
+    @IBInspectable public var imageColorOn: NSColor! = NSColor(red: 255/255, green: 172/255, blue: 51/255, alpha: 1.0) {
         didSet {
             if (selected) {
                 imageShape.fillColor = imageColorOn.CGColor
             }
         }
     }
-    @IBInspectable public var imageColorOff: UIColor! = UIColor(red: 136/255, green: 153/255, blue: 166/255, alpha: 1.0) {
+    @IBInspectable public var imageColorOff: NSColor! = NSColor(red: 136/255, green: 153/255, blue: 166/255, alpha: 1.0) {
         didSet {
             if (!selected) {
                 imageShape.fillColor = imageColorOff.CGColor
@@ -40,14 +40,14 @@ public class DOFavoriteButton: UIButton {
     
     private var circleShape: CAShapeLayer!
     private var circleMask: CAShapeLayer!
-    @IBInspectable public var circleColor: UIColor! = UIColor(red: 255/255, green: 172/255, blue: 51/255, alpha: 1.0) {
+    @IBInspectable public var circleColor: NSColor! = NSColor(red: 255/255, green: 172/255, blue: 51/255, alpha: 1.0) {
         didSet {
             circleShape.fillColor = circleColor.CGColor
         }
     }
     
     private var lines: [CAShapeLayer]! = []
-    @IBInspectable public var lineColor: UIColor! = UIColor(red: 250/255, green: 120/255, blue: 68/255, alpha: 1.0) {
+    @IBInspectable public var lineColor: NSColor! = NSColor(red: 250/255, green: 120/255, blue: 68/255, alpha: 1.0) {
         didSet {
             for i in 0 ..< 5 {
                 lines[i].strokeColor = lineColor.CGColor
@@ -73,7 +73,7 @@ public class DOFavoriteButton: UIButton {
         }
     }
     
-    @IBInspectable override public var selected : Bool {
+    @IBInspectable public var selected : Bool {
         didSet {
             if (selected != oldValue) {
                 if selected {
@@ -85,38 +85,41 @@ public class DOFavoriteButton: UIButton {
         }
     }
     
+    public var alreadyCreatedLayer : Bool = false
+    
     public convenience init() {
         self.init(frame: CGRectZero)
     }
     
     public override convenience init(frame: CGRect) {
-        let image = UIImage(named: "star", inBundle: NSBundle(forClass: self.dynamicType), compatibleWithTraitCollection: nil)
+        let image = NSImage(named: "star")
         self.init(frame: frame, image: image)
     }
     
-    public convenience init(frame: CGRect, image: UIImage!) {
+    public convenience init(frame: CGRect, image: NSImage!) {
         let imageFrame = CGRectMake(frame.size.width / 2 - frame.size.width / 4, frame.size.height / 2 - frame.size.height / 4, frame.size.width / 2, frame.size.height / 2)
         self.init(frame: frame, image: image, imageFrame: imageFrame)
     }
     
-    public init(frame: CGRect, image: UIImage!, imageFrame: CGRect) {
+    public init(frame: CGRect, image: NSImage!, imageFrame: CGRect) {
+        self.selected = false
         super.init(frame: frame)
         self.image = image
-        createLayers(image: image, imageFrame: imageFrame)
-        addTargets()
     }
     
-    public required init(coder aDecoder: NSCoder) {
+    public required init?(coder aDecoder: NSCoder) {
+        self.selected = false
         super.init(coder: aDecoder)
-        addTargets()
     }
     
-    public override func layoutSubviews() {
-        super.layoutSubviews()
-        //layoutLayers()
+    public override func drawRect(dirtyRect: NSRect) {
+        // do nothing, we got this :D
     }
     
-    private func createLayers(#image: UIImage!, imageFrame: CGRect) {
+    private func createLayers(image image: NSImage!, imageFrame: CGRect) {
+        
+        self.layer = CALayer()
+        self.wantsLayer = true
         
         let imgCenterPoint = CGPointMake(imageFrame.origin.x + imageFrame.width / 2, imageFrame.origin.y + imageFrame.height / 2)
         let lineFrame = CGRectMake(imageFrame.origin.x - imageFrame.width / 4, imageFrame.origin.y - imageFrame.height / 4 , imageFrame.width * 1.5, imageFrame.height * 1.5)
@@ -127,10 +130,10 @@ public class DOFavoriteButton: UIButton {
         circleShape = CAShapeLayer()
         circleShape.bounds = imageFrame
         circleShape.position = imgCenterPoint
-        circleShape.path = UIBezierPath(ovalInRect: imageFrame).CGPath
+        circleShape.path = NSBezierPath(ovalInRect: imageFrame).CGPath
         circleShape.fillColor = circleColor.CGColor
         circleShape.transform = CATransform3DMakeScale(0.0, 0.0, 1.0)
-        self.layer.addSublayer(circleShape)
+        self.layer!.addSublayer(circleShape)
         
         circleMask = CAShapeLayer()
         circleMask.bounds = imageFrame
@@ -138,7 +141,7 @@ public class DOFavoriteButton: UIButton {
         circleMask.fillRule = kCAFillRuleEvenOdd
         circleShape.mask = circleMask
         
-        let maskPath = UIBezierPath(rect: imageFrame)
+        let maskPath = NSBezierPath(rect: imageFrame)
         maskPath.addArcWithCenter(imgCenterPoint, radius: 0.1, startAngle: CGFloat(0.0), endAngle: CGFloat(M_PI * 2), clockwise: true)
         circleMask.path = maskPath.CGPath
         
@@ -166,7 +169,7 @@ public class DOFavoriteButton: UIButton {
             line.strokeEnd = 0.0
             line.opacity = 0.0
             line.transform = CATransform3DMakeRotation(CGFloat(M_PI) / 5 * (CGFloat(i) * 2 + 1), 0.0, 0.0, 1.0)
-            self.layer.addSublayer(line)
+            self.layer!.addSublayer(line)
             lines.append(line)
         }
         
@@ -176,13 +179,18 @@ public class DOFavoriteButton: UIButton {
         imageShape = CAShapeLayer()
         imageShape.bounds = imageFrame
         imageShape.position = imgCenterPoint
-        imageShape.path = UIBezierPath(rect: imageFrame).CGPath
+        imageShape.path = NSBezierPath(rect: imageFrame).CGPath
         imageShape.fillColor = imageColorOff.CGColor
         imageShape.actions = ["fillColor": NSNull()]
-        self.layer.addSublayer(imageShape)
+        self.layer!.addSublayer(imageShape)
+        
+        
+        let imageData = image.TIFFRepresentation
+        let source = CGImageSourceCreateWithData(imageData!, nil)
+        let maskRef = CGImageSourceCreateImageAtIndex(source!, 0, nil)
         
         let imageMask = CALayer()
-        imageMask.contents = image.CGImage
+        imageMask.contents = maskRef
         imageMask.bounds = imageFrame
         imageMask.position = imgCenterPoint
         imageShape.mask = imageMask
@@ -345,31 +353,20 @@ public class DOFavoriteButton: UIButton {
         ]
     }
     
-    private func addTargets() {
-        //===============
-        // add target
-        //===============
-        self.addTarget(self, action: "touchDown:", forControlEvents: UIControlEvents.TouchDown)
-        self.addTarget(self, action: "touchUpInside:", forControlEvents: UIControlEvents.TouchUpInside)
-        self.addTarget(self, action: "touchDragExit:", forControlEvents: UIControlEvents.TouchDragExit)
-        self.addTarget(self, action: "touchDragEnter:", forControlEvents: UIControlEvents.TouchDragEnter)
-        self.addTarget(self, action: "touchCancel:", forControlEvents: UIControlEvents.TouchCancel)
+    public override func mouseDown(theEvent: NSEvent) {
+        self.layer?.opacity = 0.4
+        super.mouseDown(theEvent)
+        self.mouseUp(theEvent)
     }
-    
-    func touchDown(sender: DOFavoriteButton) {
-        self.layer.opacity = 0.4
-    }
-    func touchUpInside(sender: DOFavoriteButton) {
-        self.layer.opacity = 1.0
-    }
-    func touchDragExit(sender: DOFavoriteButton) {
-        self.layer.opacity = 1.0
-    }
-    func touchDragEnter(sender: DOFavoriteButton) {
-        self.layer.opacity = 0.4
-    }
-    func touchCancel(sender: DOFavoriteButton) {
-        self.layer.opacity = 1.0
+
+    public override func mouseUp(theEvent: NSEvent) {
+        super.mouseUp(theEvent)
+        self.layer?.opacity = 1.0
+        if self.selected {
+            self.deselect()
+        } else {
+            self.select()
+        }
     }
     
     public func select() {
@@ -404,5 +401,42 @@ public class DOFavoriteButton: UIButton {
         lines[2].removeAllAnimations()
         lines[3].removeAllAnimations()
         lines[4].removeAllAnimations()
+    }
+}
+
+// Extensions to help bridge some missing features from AppKit
+extension NSBezierPath
+{
+    var CGPath : CGPathRef! {
+        if self.elementCount == 0 {
+            return nil
+        }
+        
+        let path = CGPathCreateMutable()
+        var didClosePath = false
+        
+        for i in 0..<self.elementCount {
+            var points = [NSPoint](count: 3, repeatedValue: NSZeroPoint)
+            
+            switch self.elementAtIndex(i, associatedPoints: &points) {
+            case .MoveToBezierPathElement:CGPathMoveToPoint(path, nil, points[0].x, points[0].y)
+            case .LineToBezierPathElement:CGPathAddLineToPoint(path, nil, points[0].x, points[0].y)
+            case .CurveToBezierPathElement:CGPathAddCurveToPoint(path, nil, points[0].x, points[0].y, points[1].x, points[1].y, points[2].x, points[2].y)
+            case .ClosePathBezierPathElement:CGPathCloseSubpath(path)
+            didClosePath = true
+            }
+        }
+        
+        if !didClosePath {
+            CGPathCloseSubpath(path)
+        }
+        
+        return CGPathCreateCopy(path)!
+    }
+    
+    func addArcWithCenter(center: NSPoint, radius: CGFloat, startAngle: CGFloat, endAngle: CGFloat, clockwise: Bool) {
+        let startAngleRadian = ((startAngle) * (180.0 / CGFloat(M_PI)))
+        let endAngleRadian = ((endAngle) * (180.0 / CGFloat(M_PI)))
+        self.appendBezierPathWithArcWithCenter(center, radius: radius, startAngle: startAngleRadian, endAngle: endAngleRadian, clockwise: !clockwise)
     }
 }

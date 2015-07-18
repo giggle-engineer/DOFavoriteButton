@@ -1,14 +1,14 @@
 PODS:
-  - DOFavoriteButton (0.0.1)
+  - DOFavoriteButton (0.0.2)
 
 DEPENDENCIES:
   - DOFavoriteButton (from `../DOFavoriteButton.podspec`)
 
 EXTERNAL SOURCES:
   DOFavoriteButton:
-    :path: ../DOFavoriteButton.podspec
+    :path: "../DOFavoriteButton.podspec"
 
 SPEC CHECKSUMS:
-  DOFavoriteButton: 3af4c4420fb2ccc520554436f6feb4b6e482617e
+  DOFavoriteButton: 61221f96a6fc56f3c055bc2aad35a870db8639a5
 
 COCOAPODS: 0.37.2
