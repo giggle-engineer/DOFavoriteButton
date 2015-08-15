@@ -361,11 +361,23 @@ public class DOFavoriteButton: NSButton {
 
     public override func mouseUp(theEvent: NSEvent) {
         super.mouseUp(theEvent)
-        self.layer?.opacity = 1.0
-        if self.selected {
-            self.deselect()
-        } else {
-            self.select()
+        
+        // we can't simply use NSEvent's locationInWindow here because it's stale by the time we mouse up
+        let mouseLocation = NSEvent.mouseLocation()
+        let rectFromScreen = self.window?.convertRectFromScreen(NSRect(x: mouseLocation.x, y: mouseLocation.y, width: 0, height: 0))
+        let windowLocation = NSPoint(x: rectFromScreen!.origin.x, y: rectFromScreen!.origin.y)
+        let locationInView = self.convertPoint(windowLocation, fromView: nil)
+        
+        if self.mouse(locationInView, inRect: self.bounds) {
+            self.layer?.opacity = 1.0
+            if self.selected {
+                self.deselect()
+            } else {
+                self.select()
+            }
+        }
+        else {
+            self.layer?.opacity = 1.0
         }
     }
     
