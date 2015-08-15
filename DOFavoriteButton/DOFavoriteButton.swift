@@ -368,16 +368,13 @@ public class DOFavoriteButton: NSButton {
         let windowLocation = NSPoint(x: rectFromScreen!.origin.x, y: rectFromScreen!.origin.y)
         let locationInView = self.convertPoint(windowLocation, fromView: nil)
         
+        self.layer?.opacity = 1.0
         if self.mouse(locationInView, inRect: self.bounds) {
-            self.layer?.opacity = 1.0
             if self.selected {
                 self.deselect()
             } else {
                 self.select()
             }
-        }
-        else {
-            self.layer?.opacity = 1.0
         }
     }
     
